@@ -59,41 +59,31 @@ router.post('/signup', (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-    // POST - finding a user and returning the user
-    console.log('===> Inside of /login');
-    console.log('===> /login -> req.body', req.body);
-
     const foundUser = await User.findOne({ email: req.body.email });
 
     if (foundUser) {
-        // user is in the DB
         let isMatch = await bcrypt.compare(req.body.password, foundUser.password);
-        console.log('Does the passwords match?', isMatch);
+        
         if (isMatch) {
-            // if user match, then we want to send a JSON Web Token
-            // Create a token payload
-            // add an expiredToken = Date.now()
-            // save the user
             const payload = {
                 id: foundUser.id,
                 email: foundUser.email,
                 name: foundUser.name
-            }
+            };
 
             jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
                 if (err) {
-                    res.status(400).json({ message: 'Session has endedd, please log in again'});
+                    return res.status(400).json({ success: false, message: 'Session has ended, please log in again' });
                 }
-                const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
-                console.log('===> legit', legit);
-                res.json({ success: true, token: `Bearer ${token}`, userData: legit });
+                const legit = jwt.verify(token, JWT_SECRET);
+                return res.json({ success: true, token: `Bearer ${token}`, userData: legit });
             });
 
         } else {
-            return res.status(400).json({ message: 'Email or Password is incorrect' });
+            return res.status(400).json({ success: false, message: 'Invalid email or password' });
         }
     } else {
-        return res.status(400).json({ message: 'User not found' });
+        return res.status(400).json({ success: false, message: 'User not found' });
     }
 });
 
