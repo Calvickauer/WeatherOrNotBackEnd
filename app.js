@@ -6,6 +6,21 @@ const mongoose = require('mongoose');
 require('./config/passport')(passport);
 const axios = require('axios');
 const { google } = require('googleapis');
+const connectDatabase = async () => {
+  try {
+    mongoose.set("useNewUrlParser", true);
+    
+    await mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
+      useUnifiedTopology: true,
+    });
+    console.log("connected to database");
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
+};
+
+connectDatabase();
 
 const youtube = google.youtube({
   version: 'v3',

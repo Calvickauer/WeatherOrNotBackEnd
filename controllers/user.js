@@ -36,27 +36,34 @@ router.post('/signup', (req, res) => {
 
             // Salt and hash the password - before saving the user
             bcrypt.genSalt(10, (err, salt) => {
-                if (err) throw Error;
+                if (err) {
+                    console.log('==> Error inside of genSalt', err);
+                    return res.status(500).json({ message: 'Error occurred during user registration' });
+                }
 
                 bcrypt.hash(newUser.password, salt, (err, hash) => {
-                    if (err) console.log('==> Error inside of hash', err);
+                    if (err) {
+                        console.log('==> Error inside of hash', err);
+                        return res.status(500).json({ message: 'Error occurred during user registration' });
+                    }
                     // Change the password in newUser to the hash
                     newUser.password = hash;
                     newUser.save()
-                    .then(createdUser => res.json({ user: createdUser}))
+                    .then(createdUser => res.json({ user: createdUser }))
                     .catch(err => {
-                        console.log('error with creating new user', err);
-                        res.json({ message: 'Error occured... Please try again.'});
+                        console.log('==> Error saving user', err);
+                        res.json({ message: 'Error occurred... Please try again.' });
                     });
                 });
             });
         }
     })
     .catch(err => { 
-        console.log('Error finding user', err);
-        res.json({ message: 'Error occured... Please try again.'})
+        console.log('==> Error finding user', err);
+        res.json({ message: 'Error occurred... Please try again.' });
     })
 });
+
 
 router.post('/login', async (req, res) => {
     const foundUser = await User.findOne({ email: req.body.email });
