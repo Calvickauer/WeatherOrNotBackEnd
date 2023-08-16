@@ -110,9 +110,15 @@ router.get('/messages', passport.authenticate('jwt', { session: false }), async 
     console.log('====> user')
     console.log(req.user);
     const { id, name, email } = req.user; // object with user object inside
-    const messageArray = ['message 1', 'message 2', 'message 3', 'message 4', 'message 5', 'message 6', 'message 7', 'message 8', 'message 9'];
-    const sameUser = await User.findById(id);
-    res.json({ id, name, email, message: messageArray, sameUser });
+    const userIdToAccess = 'your_specific_user_id'; // Change this to the specific user ID you want to allow access to
+
+    if (id === userIdToAccess) {
+        const messageArray = ['message 1', 'message 2', 'message 3', 'message 4', 'message 5', 'message 6', 'message 7', 'message 8', 'message 9'];
+        const sameUser = await User.findById(id);
+        res.json({ id, name, email, message: messageArray, sameUser });
+    } else {
+        res.status(403).json({ message: 'Access denied' });
+    }
 });
 
 // Exports
